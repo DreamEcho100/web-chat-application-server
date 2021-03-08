@@ -1,11 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 
-const { appKey, appPort, appUrl } = require('./config/app');
+const config = require('./config/app');
+const router = require('./router');
+
+const port = config.appPort;
 const app = express();
 
 app.use(cors());
-app.use(express());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/home', (req, res) => res.send('Hello World! Home Screen'));
-app.listen(appPort, () => console.log(`App listening on PORT ${appPort}!`));
+app.use(router);
+
+app.listen(port, () => console.log(`App listening on PORT ${port}!`));
