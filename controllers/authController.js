@@ -7,7 +7,7 @@ const User = require('../models').User;
 const config = require('../config/app');
 
 const generateToken = (user) => {
-	// delete user.password;
+	delete user.password;
 
 	const token = jwt.sign(user, config.appKey, { expiresIn: 86480 });
 
