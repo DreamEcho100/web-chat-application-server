@@ -11,19 +11,16 @@ const generateToken = (user) => {
 
 	const token = jwt.sign(user, config.appKey, { expiresIn: 86480 });
 
-	return { ...user, ...{ token } };
+	return { ...{ user }, ...{ token } };
 };
 
 exports.login = async (request, response) => {
 	try {
-		// console.log(require('crypto').randomBytes(64).toString('hex'));
-		// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZmlyc3ROYW1lIjoiSm9obiIsImxhc3ROYW1lIjoiRG9lIiwiZW1haWwiOiJqb2huLmRvZUBnbWFpbC5jb20iLCJnZW5kZXIiOiJtYWxlIiwiYXZhdGFyIjpudWxsLCJjcmVhdGVkQXQiOiIyMDIxLTAzLTA4VDA5OjI5OjM3LjIzMVoiLCJ1cGRhdGVkQXQiOiIyMDIxLTAzLTA4VDA5OjI5OjM3LjIzMVoiLCJpYXQiOjE2MTUyMDYyNDcsImV4cCI6MTYxNTI5MjcyN30.Xed3wJCSUULY_BNOQOoQxp9BMQFsP4W7i-imVl0S-3k
 		const { email, password } = request.body;
 		// Find the user
 		const user = await User.findOne({
 			where: { email },
 		});
-
 		// Check if user found
 		if (!user) {
 			return response.status(404).json({ message: 'User not found!' });
@@ -36,7 +33,7 @@ exports.login = async (request, response) => {
 
 		// generate auth
 		const userWithToken = generateToken(user.get({ raw: true }));
-		//
+		userWithToken.user.avatar = user.avatar;
 		return response.status(200).json(userWithToken);
 	} catch (error) {
 		console.error(error);
@@ -54,18 +51,10 @@ exports.register = async (request, response) => {
 			password,
 			gender,
 		});
-		// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NywiZmlyc3ROYW1lIjoiTGVubnkiLCJsYXN0TmFtZSI6IkRvZSIsImVtYWlsIjoibGVubnkuZG9lQGdtYWlsLmNvbSIsImdlbmRlciI6Im1hbGUiLCJ1cGRhdGVkQXQiOiIyMDIxLTAzLTA4VDEyOjM3OjM0LjA4OFoiLCJjcmVhdGVkQXQiOiIyMDIxLTAzLTA4VDEyOjM3OjM0LjA4OFoiLCJhdmF0YXIiOm51bGwsImlhdCI6MTYxNTIwNzA1NCwiZXhwIjoxNjE1MjkzNTM0fQ.4HesQHnAcQDieKi5IBMo2G9xeY4O_gM8P7mzZhx_N2Y
-		/*
-{
-    "firstName": "Lenny",
-    "lastName": "Doe",
-    "email": "lenny.doe@gmail.com",
-    "password": "secret4",
-    "gender": "male"
-}
-    */
+
 		// generate auth
 		const userWithToken = generateToken(user.get({ raw: true }));
+		userWithToken.user.avatar = user.avatar;
 		return response.status(200).json(userWithToken);
 	} catch (error) {
 		console.error(error);
