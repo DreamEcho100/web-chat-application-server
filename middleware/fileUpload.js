@@ -4,6 +4,7 @@ const path = require('path');
 
 const getFileType = (file) => {
 	const mimeType = file.mimetype.split('/');
+	console.log(mimeType[mimeType.length - 1], file);
 	return mimeType[mimeType.length - 1];
 };
 
@@ -19,7 +20,7 @@ const generateFileName = (request, file, cb) => {
 const fileFilter = (request, file, cb) => {
 	const extension = getFileType(file);
 
-	const allowedTypes = /jpeg|jpg|png|gif|svg/;
+	const allowedTypes = /jpeg|jpg|png|gif/i;
 	// const allowedTypes = /jpeg|jpg|png|gif|svg+xml/;
 
 	const passed = allowedTypes.test(extension);
