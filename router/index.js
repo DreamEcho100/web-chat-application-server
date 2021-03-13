@@ -6,4 +6,6 @@ router.get('/home', (request, response) => {
 
 router.use('/', require('./auth'));
 
+router.use('/users', require('./user'));
+
 module.exports = router;
