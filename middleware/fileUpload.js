@@ -20,6 +20,7 @@ const fileFilter = (request, file, cb) => {
 	const extension = getFileType(file);
 
 	const allowedTypes = /jpeg|jpg|png|gif|svg/;
+	// const allowedTypes = /jpeg|jpg|png|gif|svg+xml/;
 
 	const passed = allowedTypes.test(extension);
 
