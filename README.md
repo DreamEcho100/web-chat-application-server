@@ -28,4 +28,4 @@ sequelize seed:create --name chats
 
 sequelize db:seed --seed [filename]
 
-sequelize db:seed --seed 20210313182502-chats
+sequelize db:seed --seed 20210314123106-chats
