@@ -32,10 +32,15 @@ const fileFilter = (request, file, cb) => {
 	return cb(null, false);
 };
 
-exports.userFile = ((req, res, next) => {
+exports.userFile = ((request, response, next) => {
 	const storage = multer.diskStorage({
-		destination: function (req, file, cb) {
-			const { id } = req.user;
+		destination: function (request, file, cb) {
+			let id;
+			if (request.user) {
+				id = request.user.id;
+			} else {
+				return response.status(404).json({ error: 'No avatar provided' });
+			}
 			const dest = `uploads/user/${id}`;
 
 			fs.access(dest, (error) => {
