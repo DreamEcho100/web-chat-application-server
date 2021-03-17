@@ -36,7 +36,7 @@ exports.userFile = ((request, response, next) => {
 	const storage = multer.diskStorage({
 		destination: function (request, file, cb) {
 			let id;
-			if (request.user) {
+			if (request.user && request.user.id) {
 				id = request.user.id;
 			} else {
 				return response.status(404).json({ error: 'No avatar provided' });

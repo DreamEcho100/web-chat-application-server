@@ -24,8 +24,10 @@ sequelize db:migrate
 
 ### Chat seeder file
 
-sequelize seed:create --name chats
+sequelize seed:create --name chats-2
 
 sequelize db:seed --seed [filename]
 
 sequelize db:seed --seed 20210314123106-chats
+
+sequelize db:seed --seed 20210317162520-chats-2
