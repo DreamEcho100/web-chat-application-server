@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
 
 const config = require('./config/app');
 const router = require('./router');
@@ -15,4 +16,8 @@ app.use(express.static(__dirname + '/uploads'));
 
 app.use(router);
 
-app.listen(port, () => console.log(`App listening on PORT ${port}!`));
+const server = http.createServer(app);
+const SoketServer = require('./socket');
+SoketServer(server);
+
+server.listen(port, () => console.log(`App listening on PORT ${port}!`));

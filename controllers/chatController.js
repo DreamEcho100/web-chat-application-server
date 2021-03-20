@@ -7,6 +7,9 @@ const ChatUser = models.ChatUser;
 const Message = models.Message;
 
 exports.index = async (request, response) => {
+	if (!request.user && !request.user.id) {
+		return response.status(404).json({ error: 'No id provided' });
+	}
 	const user = await User.findOne({
 		where: {
 			id: request.user.id,

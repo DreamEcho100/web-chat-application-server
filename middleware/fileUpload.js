@@ -4,7 +4,7 @@ const path = require('path');
 
 const getFileType = (file) => {
 	const mimeType = file.mimetype.split('/');
-	console.log(mimeType[mimeType.length - 1], file);
+	// console.log(mimeType[mimeType.length - 1], file);
 	return mimeType[mimeType.length - 1];
 };
 
