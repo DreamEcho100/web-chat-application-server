@@ -2,6 +2,7 @@
 const socketIo = require('socket.io');
 
 const { sequelize } = require('../models');
+const Message = require('../models').Message;
 
 const users = new Map();
 const userSockets = new Map();
@@ -37,7 +38,7 @@ const SocketServer = (server) => {
 
 			const chatters = await getChatters(user.id);
 
-			// console.log(chatters);
+			console.log(chatters);
 
 			// notify his friends that user is now online
 			for (let i = 0; i < chatters.length; i++) {
@@ -66,12 +67,51 @@ const SocketServer = (server) => {
 			io.to(socket.id).emit('typing', 'Using typing...');
 		});
 
+		socket.on('message', async (message) => {
+			let sockets = [];
+
+			if (users.has(message.fromUser.id)) {
+				sockets = users.get(message.fromUser.id).sockets;
+			}
+
+			message.toUserId.forEach((id) => {
+				if (users.has(id)) {
+					sockets = [...sockets, ...users.get(id).sockets];
+				}
+			});
+
+			try {
+				const msg = {
+					type: message.type,
+					fromUserId: message.fromUser.id,
+					chatId: message.chatId,
+					message: message.message,
+				};
+
+				const savedMessage = await Message.create(msg);
+
+				message.User = message.fromUser;
+				message.fromUserId = message.fromUser.id;
+				message.id = savedMessage.id;
+				message.message = savedMessage.message;
+				message.createdAt = savedMessage.createdAt;
+				delete message.fromUser;
+
+				sockets.forEach((socket) => {
+					io.to(socket).emit('received', message);
+				});
+			} catch (error) {
+				console.error(error);
+				return [];
+			}
+		});
+
 		socket.on('disconnect', async () => {
 			if (userSockets.has(socket.id)) {
 				const user = users.get(userSockets.get(socket.id));
 
 				if (user.sockets.length > 1) {
-					user.sockets = user.socket.filter((sock) => {
+					user.sockets = user.sockets.filter((sock) => {
 						if (sock !== socket.id) return true;
 
 						userSockets.delete(sock);
@@ -119,8 +159,8 @@ const getChatters = async (userId) => {
     `);
 
 		return results.length > 0 ? results.map((el) => el.userId) : [];
-	} catch (e) {
-		console.error(e);
+	} catch (error) {
+		console.error(error);
 		return [];
 	}
 };
