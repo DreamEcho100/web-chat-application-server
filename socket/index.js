@@ -106,6 +106,16 @@ const SocketServer = (server) => {
 			}
 		});
 
+		socket.on('typing', async (message) => {
+			message.toUserId.forEach((id) => {
+				if (users.has(id)) {
+					users.get(id).sockets.forEach((socket) => {
+						io.to(socket).emit('typing', message);
+					});
+				}
+			});
+		});
+
 		socket.on('disconnect', async () => {
 			if (userSockets.has(socket.id)) {
 				const user = users.get(userSockets.get(socket.id));
