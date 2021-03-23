@@ -191,6 +191,14 @@ exports.messages = async (request, response) => {
 	return response.json(result);
 };
 
+exports.imageUpload = async (request, response) => {
+	if (request.file) {
+		return response.json({ url: request.file.filename });
+	}
+
+	return response.status(500).json('No image uploaded!');
+};
+
 exports.deleteChat = async (request, response) => {
 	try {
 		const { id } = request.params;

@@ -13,7 +13,7 @@ exports.auth = (request, response, next) => {
 		if (error) {
 			return response.status(401).json({ error });
 		}
-		// console.log(user);
+
 		request.user = user;
 	});
 

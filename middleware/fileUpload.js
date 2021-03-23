@@ -109,3 +109,31 @@ exports.userFile = ((request, response, next) => {
 	return multer({ storage, fileFilter }).single('avatar');
 })();
 */
+
+exports.chatFile = ((request, response, next) => {
+	const storage = multer.diskStorage({
+		destination: function (request, file, cb) {
+			let { id } = request.body;
+			/*if (request.user && request.user.id) {
+				id = request.user.id;
+			} else {
+				return response.status(404).json({ error: 'No image provided' });
+			}*/
+			const dest = `uploads/chat/${id}`;
+
+			fs.access(dest, (error) => {
+				// if doens't exist
+				if (error) {
+					return fs.mkdir(dest, (error) => {
+						cb(error, dest);
+					});
+				} else {
+					return cb(null, dest);
+				}
+			});
+		},
+		filename: generateFileName,
+	});
+
+	return multer({ storage, fileFilter }).single('image');
+})();
