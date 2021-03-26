@@ -38,7 +38,7 @@ const SocketServer = (server) => {
 
 			const chatters = await getChatters(user.id);
 
-			console.log(chatters);
+			// console.log(chatters);
 
 			// notify his friends that user is now online
 			for (let i = 0; i < chatters.length; i++) {
@@ -114,6 +114,28 @@ const SocketServer = (server) => {
 					});
 				}
 			});
+		});
+
+		socket.on('add-friend', (chats) => {
+			try {
+				let online = 'offline';
+				if (users.has(chats[1].Users[0].id)) {
+					online = 'online';
+					chats[0].Users[0].online = 'online';
+					users.get(chats[1].Users[0].id).sockets.forEach((socket) => {
+						io.to(socket).emit('new-chat', chats[0]);
+					});
+				}
+
+				if (users.has(chats[0].Users[0].id)) {
+					chats[1].Users[0].online = 'online';
+					users.get(chats[0].Users[0].id).sockets.forEach((socket) => {
+						io.to(socket).emit('new-chat', chats[1]);
+					});
+				}
+			} catch (error) {
+				console.error(error);
+			}
 		});
 
 		socket.on('disconnect', async () => {
