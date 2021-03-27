@@ -30,5 +30,40 @@ exports.update = async (request, response) => {
 	} catch (error) {
 		return response.status(500).json({ error: error.message });
 	}
-	// return response.send('User controller.');
+
+	return response.send('User controller.');
+};
+
+exports.search = async (request, response) => {
+	try {
+		const users = await User.findAll({
+			where: {
+				[sequelize.Op.or]: {
+					namesConcated: sequelize.where(
+						sequelize.fn(
+							'concat',
+							sequelize.col('firstName'),
+							' ',
+							sequelize.col('lastName')
+						),
+						{
+							[sequelize.Op.iLike]: `%${request.query.term}%`,
+						}
+					),
+					email: {
+						[sequelize.Op.iLike]: `%${request.query.term}%`,
+					},
+				},
+				[sequelize.Op.not]: {
+					id: request.user.id,
+				},
+			},
+			limit: 10,
+		});
+
+		return response.json(users);
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ error: errormessage });
+	}
 };
