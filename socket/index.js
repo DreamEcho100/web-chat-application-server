@@ -128,7 +128,7 @@ const SocketServer = (server) => {
 				}
 
 				if (users.has(chats[0].Users[0].id)) {
-					chats[1].Users[0].online = 'online';
+					chats[1].Users[0].online = online;
 					users.get(chats[0].Users[0].id).sockets.forEach((socket) => {
 						io.to(socket).emit('new-chat', chats[1]);
 					});

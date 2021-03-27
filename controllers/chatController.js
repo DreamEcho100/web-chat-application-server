@@ -73,7 +73,7 @@ exports.create = async (request, response) => {
 		});
 
 		if (user && user.Chats.length > 0) {
-			console.log(user, user.Chats);
+			// console.log(user, user.Chats);
 			return response.status(403).json({
 				status: 'Error',
 				message: 'Chat with this user already exists!',
@@ -98,27 +98,27 @@ exports.create = async (request, response) => {
 
 		await transac.commit();
 
-		const chatNew = await Chat.findOne({
-			where: {
-				id: chat.id,
-			},
-			include: [
-				{
-					model: User,
-					where: {
-						[Op.not]: {
-							id: request.user.id,
-						},
-					},
-				},
-				{
-					model: Message,
-				},
-			],
-		});
+		// const chatNew = await Chat.findOne({
+		// 	where: {
+		// 		id: chat.id,
+		// 	},
+		// 	include: [
+		// 		{
+		// 			model: User,
+		// 			where: {
+		// 				[Op.not]: {
+		// 					id: request.user.id,
+		// 				},
+		// 			},
+		// 		},
+		// 		{
+		// 			model: Message,
+		// 		},
+		// 	],
+		// });
 
-		return response.json(chatNew);
-		/*
+		// return response.json(chatNew);
+
 		const creator = await User.findOne({
 			where: {
 				id: request.user.id,
@@ -146,7 +146,6 @@ exports.create = async (request, response) => {
 		};
 
 		return response.json([forCreator, forReceiver]);
-		*/
 	} catch (error) {
 		await transac.rollback();
 		return response
