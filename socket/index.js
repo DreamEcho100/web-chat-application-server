@@ -48,7 +48,7 @@ const SocketServer = (server) => {
 						try {
 							io.to(socket).emit('online', user);
 						} catch (error) {
-							console.error(error);
+							// console.error(error);
 						}
 					});
 					onlineFriends.push(chatter.id);
@@ -60,7 +60,7 @@ const SocketServer = (server) => {
 				try {
 					io.to(socket).emit('friends', onlineFriends);
 				} catch (error) {
-					console.error(error);
+					// console.error(error);
 				}
 			});
 
@@ -101,7 +101,7 @@ const SocketServer = (server) => {
 					io.to(socket).emit('received', message);
 				});
 			} catch (error) {
-				console.error(error);
+				// console.error(error);
 				return [];
 			}
 		});
@@ -134,8 +134,65 @@ const SocketServer = (server) => {
 					});
 				}
 			} catch (error) {
-				console.error(error);
+				// console.error(error);
 			}
+		});
+
+		socket.on('add-user-to-group', ({ chat, newChatter }) => {
+			if (users.has(newChatter.id)) {
+				newChatter.status = 'online';
+			}
+
+			// Old users
+			chat.Users.forEach((user, index) => {
+				if (users.has(user.id)) {
+					chat.Users[index].status = 'online';
+					users.get(user.id).sockets.forEach((socket) => {
+						try {
+							io.to(socket).emit('added-user-to-group', {
+								chat,
+								chatters: [newChatter],
+							});
+						} catch (error) {
+							// console.error(error)
+						}
+					});
+				}
+			});
+
+			// Send to new user
+			if (users.has(newChatter.id)) {
+				users.get(newChatter.id).sockets.forEach((socket) => {
+					try {
+						io.to(socket).emit('added-user-to-group', {
+							chat,
+							chatters: chat.Users,
+						});
+					} catch (error) {
+						// console.error(error)
+					}
+				});
+			}
+		});
+
+		socket.on('leave-current-chat', (data) => {
+			const { chatId, userId, currentUserId, notifyUsers } = data;
+
+			notifyUsers.forEach((id) => {
+				if (users.has(id)) {
+					users.get(id).sockets.forEach((socket) => {
+						try {
+							io.to(socket).emit('remove-user-from-chat', {
+								chatId,
+								userId,
+								currentUserId,
+							});
+						} catch (error) {
+							// console.error(error);
+						}
+					});
+				}
+			});
 		});
 
 		socket.on('disconnect', async () => {
@@ -160,7 +217,7 @@ const SocketServer = (server) => {
 								try {
 									io.to(socket).emit('offline', user);
 								} catch (e) {
-									console.error(e);
+									// console.error(e);
 									return [];
 								}
 							});
@@ -192,7 +249,7 @@ const getChatters = async (userId) => {
 
 		return results.length > 0 ? results.map((el) => el.userId) : [];
 	} catch (error) {
-		console.error(error);
+		// console.error(error);
 		return [];
 	}
 };

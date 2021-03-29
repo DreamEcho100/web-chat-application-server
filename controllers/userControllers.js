@@ -26,12 +26,12 @@ exports.update = async (request, response) => {
 		user.avatar = result[0].avatar;
 		delete user.password;
 
-		response.json(user);
+		return response.json(user);
 	} catch (error) {
 		return response.status(500).json({ error: error.message });
 	}
 
-	return response.send('User controller.');
+	// return response.send('User controller.');
 };
 
 exports.search = async (request, response) => {
