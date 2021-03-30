@@ -201,7 +201,6 @@ exports.imageUpload = async (request, response) => {
 exports.addUserToGroup = async (request, response) => {
 	try {
 		const { chatId, userId } = request.body;
-
 		const chat = await Chat.findOne({
 			where: {
 				id: chatId,
@@ -226,13 +225,18 @@ exports.addUserToGroup = async (request, response) => {
 		chat.Messages.reverse();
 
 		// Check if already in group
+		let userAlreadyExist = false;
 		chat.Users.forEach((user) => {
 			if (user.id === userId) {
-				return response
-					.status(403)
-					.json({ message: 'User already in the group!' });
+				userAlreadyExist = true;
 			}
 		});
+
+		if (userAlreadyExist) {
+			return response
+				.status(403)
+				.json({ message: 'User already in the group!' });
+		}
 
 		await ChatUser.create({ chatId, userId });
 
@@ -249,7 +253,9 @@ exports.addUserToGroup = async (request, response) => {
 
 		return response.json({ chat, newChatter });
 	} catch (error) {
-		return res.status(500).json({ status: 'Error', message: error.message });
+		return response
+			.status(500)
+			.json({ status: 'Error', message: error.message });
 	}
 };
 
@@ -266,10 +272,64 @@ exports.deleteChat = async (request, response) => {
 				},
 			],
 		});
-		const notifyUser = chat.Users.map((user) => user.id);
+		const notifyUsers = chat.Users.map((user) => user.id);
 
 		await chat.destroy();
-		return response.json({ chatId: id, notifyUser });
+		return response.json({ chatId: id, notifyUsers });
+	} catch (error) {
+		return response
+			.status(500)
+			.json({ status: 'Error', message: error.message });
+	}
+};
+
+exports.leaveCurrentChat = async (request, response) => {
+	try {
+		const { chatId } = request.body;
+		const chat = await Chat.findOne({
+			where: {
+				id: chatId,
+			},
+			include: [
+				{
+					model: User,
+				},
+			],
+		});
+
+		if (chat.Users.length === 2) {
+			return response
+				.status(403)
+				.json({ status: 'Error', message: 'You cannot leave this chat' });
+		}
+
+		if (chat.Users.length === 3) {
+			chat.type = 'dual';
+			chat.save();
+		}
+
+		await ChatUser.destroy({
+			where: {
+				chatId,
+				userId: request.user.id,
+			},
+		});
+
+		await Message.destroy({
+			where: {
+				chatId,
+				fromUserId: request.user.id,
+			},
+		});
+
+		const notifyUsers = chat.Users.map((user) => user.id);
+
+		return response.json({
+			chatId: chat.id,
+			userId: request.user.id,
+			currentUserId: request.user.id,
+			notifyUsers,
+		});
 	} catch (error) {
 		return response
 			.status(500)

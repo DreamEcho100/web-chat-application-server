@@ -121,14 +121,19 @@ const SocketServer = (server) => {
 				let online = 'offline';
 				if (users.has(chats[1].Users[0].id)) {
 					online = 'online';
-					chats[0].Users[0].online = 'online';
+					chats[0].Users[0].status = users.has(chats[0].Users[0].id)
+						? 'online'
+						: 'offline';
 					users.get(chats[1].Users[0].id).sockets.forEach((socket) => {
 						io.to(socket).emit('new-chat', chats[0]);
 					});
 				}
 
-				if (users.has(chats[0].Users[0].id)) {
-					chats[1].Users[0].online = online;
+				if (
+					/*users.has(chats[0].Users[0].id)*/
+					chats[0].Users[0].status === 'online'
+				) {
+					chats[1].Users[0].status = online;
 					users.get(chats[0].Users[0].id).sockets.forEach((socket) => {
 						io.to(socket).emit('new-chat', chats[1]);
 					});
@@ -187,6 +192,22 @@ const SocketServer = (server) => {
 								userId,
 								currentUserId,
 							});
+						} catch (error) {
+							// console.error(error);
+						}
+					});
+				}
+			});
+		});
+
+		socket.on('delete-chat', (data) => {
+			const { chatId, notifyUsers } = data;
+
+			notifyUsers.forEach((id) => {
+				if (users.has(id)) {
+					users.get(id).sockets.forEach((socket) => {
+						try {
+							io.to(socket).emit('delete-chat', parseInt(chatId));
 						} catch (error) {
 							// console.error(error);
 						}
