@@ -216,6 +216,16 @@ const SocketServer = (server) => {
 			});
 		});
 
+		socket.on('requesting-a-dual-video-call', (data) => {
+			if (data.toUsersId[0]) {
+				data.toUsersId.map((id) => {
+					users.get(data.toUsersId[0]).sockets.forEach((socket) => {
+						io.to(socket).emit('requesting-a-dual-video-call', data);
+					});
+				});
+			}
+		});
+
 		socket.on('disconnect', async () => {
 			if (userSockets.has(socket.id)) {
 				const user = users.get(userSockets.get(socket.id));
